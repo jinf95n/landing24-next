@@ -155,7 +155,7 @@ const LegalTerms = () => (
       </div>
 
       <div className="d- flex justify-center">
-        <Link to="/" className={`w-300 inline-flex items-center justify-center gap-2 font-bold py-3 px-6 rounded-xl transition-all duration-300 hover:-translate-y-0.5 bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg shadow-accent/25`}>
+        <Link href="/" className={`w-300 inline-flex items-center justify-center gap-2 font-bold py-3 px-6 rounded-xl transition-all duration-300 hover:-translate-y-0.5 bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg shadow-accent/25`}>
           Volver al inicio
         </Link>
       </div>
