@@ -11,6 +11,7 @@ export async function getAllPosts() {
       coverImage,
       "author": author->{ name, role, image },
       "category": category->{ title, slug },
+      "readingTime": round(length(pt::text(body)) / 5 / 200),
     }
   `);
 }

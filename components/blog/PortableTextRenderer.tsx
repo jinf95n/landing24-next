@@ -25,18 +25,40 @@ const components = {
     ),
   },
   block: {
-    h2: ({ children }: any) => (
-      <h2 className="text-2xl font-bold text-foreground mt-10 mb-4 scroll-mt-24">
-        {children}
-      </h2>
-    ),
-    h3: ({ children }: any) => (
-      <h3 className="text-xl font-bold text-foreground mt-8 mb-3 scroll-mt-24">
-        {children}
-      </h3>
-    ),
+    h2: ({ children }: any) => {
+      const id = children[0]
+        ?.toString()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]/g, "");
+      return (
+        <h2
+          id={id}
+          className="text-2xl font-bold text-foreground mt-10 mb-4 scroll-mt-24"
+        >
+          {children}
+        </h2>
+      );
+    },
+    h3: ({ children }: any) => {
+      const id = children[0]
+        ?.toString()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]/g, "");
+      return (
+        <h3
+          id={id}
+          className="text-xl font-bold text-foreground mt-8 mb-3 scroll-mt-24"
+        >
+          {children}
+        </h3>
+      );
+    },
     normal: ({ children }: any) => (
-      <p className="text-foreground/80 leading-relaxed mb-6">{children}</p>
+      <p className="text-foreground/80 leading-relaxed mb-6 text-lg">
+        {children}
+      </p>
     ),
     blockquote: ({ children }: any) => (
       <blockquote className="border-l-4 border-accent pl-6 my-6 text-muted-foreground italic">

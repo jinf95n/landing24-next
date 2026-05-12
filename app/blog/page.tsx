@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getAllPosts, getAllCategories } from "@/lib/sanity.queries";
 import BlogCard from "@/components/blog/BlogCard";
+import BlogNavbar from "@/components/blog/BlogNavbar";
 
 export const metadata: Metadata = {
   title: "Blog — Diseño Web y Presencia Digital",
@@ -18,7 +19,8 @@ export default async function BlogPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <section className="bg-primary py-20">
+      <BlogNavbar />
+      <section className="bg-primary pt-32 pb-20 py-20">
         <div className="container text-center">
           <span className="text-accent font-semibold text-sm uppercase tracking-widest">
             Blog
@@ -27,8 +29,8 @@ export default async function BlogPage() {
             Recursos para tu negocio digital
           </h1>
           <p className="text-primary-foreground/70 text-lg max-w-xl mx-auto">
-            Guías, consejos y casos reales sobre presencia digital, SEO y
-            diseño web para negocios argentinos.
+            Guías, consejos y casos reales sobre presencia digital, SEO y diseño
+            web para negocios argentinos.
           </p>
         </div>
       </section>
@@ -52,7 +54,15 @@ export default async function BlogPage() {
             Próximamente los primeros artículos.
           </p>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div
+            className={`grid gap-8 ${
+              posts.length === 1
+                ? "max-w-xl"
+                : posts.length === 2
+                  ? "md:grid-cols-2 max-w-3xl mx-auto"
+                  : "md:grid-cols-2 lg:grid-cols-3"
+            }`}
+          >
             {posts.map((post: any) => (
               <BlogCard key={post._id} post={post} />
             ))}

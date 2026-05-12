@@ -10,6 +10,7 @@ import FAQSection from "@/components/interactive/FAQSection";
 import Footer from "@/components/sections/Footer";
 import WhatsAppButton from "@/components/sections/WhatsAppButton";
 import ConversionWrapper from "@/components/interactive/ConversionWrapper";
+import BlogPreview from "@/components/sections/BlogPreview";
 
 export default function Home() {
   return (
@@ -23,6 +24,7 @@ export default function Home() {
         <PortfolioSection />
         <TestimonialsSection />
         <PricingSection />
+        <BlogPreview />
         <FAQSection />
         <Footer />
         <WhatsAppButton />

@@ -7,7 +7,10 @@ import PortableTextRenderer from "@/components/blog/PortableTextRenderer";
 import TableOfContents from "@/components/blog/TableOfContents";
 import AuthorCard from "@/components/blog/AuthorCard";
 import RelatedPosts from "@/components/blog/RelatedPosts";
-import { Link } from "lucide-react";
+import { MessageCircle } from "lucide-react";
+import BlogNavbar from "@/components/blog/BlogNavbar";
+import Breadcrumbs from "@/components/blog/Breadcrumbs";
+import BlogCTA from "@/components/blog/BlogCTA";
 
 export const revalidate = 60;
 
@@ -16,12 +19,16 @@ export async function generateStaticParams() {
   return posts.map((post: any) => ({ slug: post.slug.current }));
 }
 
+const WHATSAPP_LINK =
+  "https://wa.me/5492646233326?text=Hola!%20Vi%20el%20blog%20y%20quiero%20consultar%20sobre%20mi%20sitio%20web";
+
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug);
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
   if (!post) return {};
 
   return {
@@ -40,19 +47,26 @@ export async function generateMetadata({
 export default async function PostPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const post = await getPostBySlug(params.slug);
-  if (!post) notFound();
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
 
-  const readingTime = Math.ceil(
-    post.body?.reduce((acc: number, block: any) => {
-      if (block._type === "block") {
-        return acc + block.children?.map((c: any) => c.text).join("").split(" ").length;
-      }
-      return acc;
-    }, 0) / 200
-  ) || 5;
+  const readingTime =
+    Math.ceil(
+      post.body?.reduce((acc: number, block: any) => {
+        if (block._type === "block") {
+          return (
+            acc +
+            block.children
+              ?.map((c: any) => c.text)
+              .join("")
+              .split(" ").length
+          );
+        }
+        return acc;
+      }, 0) / 200,
+    ) || 5;
 
   const publishedDate = new Date(post.publishedAt).toLocaleDateString("es-AR", {
     year: "numeric",
@@ -62,9 +76,18 @@ export default async function PostPage({
 
   return (
     <main className="min-h-screen bg-background">
+      <BlogNavbar />
       {/* Hero */}
       <section className="bg-primary pt-24 pb-12">
         <div className="container max-w-4xl">
+          <Breadcrumbs
+            crumbs={[
+              { label: "Inicio", href: "/" },
+              { label: "Blog", href: "/blog" },
+              { label: post.category?.title || "Artículo", href: "/blog" },
+              { label: post.title },
+            ]}
+          />
           {post.category && (
             <span className="text-accent font-semibold text-sm uppercase tracking-widest">
               {post.category.title}
@@ -73,7 +96,9 @@ export default async function PostPage({
           <h1 className="text-3xl md:text-5xl font-black text-primary-foreground mt-3 mb-6 leading-tight">
             {post.title}
           </h1>
-          <p className="text-primary-foreground/70 text-lg mb-8">{post.excerpt}</p>
+          <p className="text-primary-foreground/70 text-lg mb-8">
+            {post.excerpt}
+          </p>
           <div className="flex items-center gap-4 text-sm text-primary-foreground/50">
             <span>{post.author?.name}</span>
             <span>·</span>
@@ -84,9 +109,9 @@ export default async function PostPage({
         </div>
       </section>
 
-      {/* Cover image */}
+      {/* Cover image — FUERA del container */}
       {post.coverImage && (
-        <div className="relative aspect-[21/9] max-h-[500px] overflow-hidden">
+        <div className="relative w-full h-[500px] overflow-hidden">
           <Image
             src={urlFor(post.coverImage).width(1400).url()}
             alt={post.coverImage.alt || post.title}
@@ -96,13 +121,20 @@ export default async function PostPage({
           />
         </div>
       )}
-
       {/* Content */}
       <section className="container py-16">
-        <div className="flex gap-16 max-w-6xl mx-auto">
-          {/* Article */}
+        <div className="flex gap-16 max-w-4xl mx-auto">
+           {/* TOC */}
+          {post.body?.some((b: any) => ["h2", "h3"].includes(b.style)) && (
+            <aside className="hidden lg:block w-64 flex-shrink-0">
+              <TableOfContents body={post.body} />
+            </aside>
+          )}
           <article className="flex-1 min-w-0">
             <PortableTextRenderer content={post.body} />
+            {/* CTA inline */}
+            <BlogCTA />
+
             {post.author && <AuthorCard author={post.author} />}
 
             {/* CTA */}
@@ -113,22 +145,22 @@ export default async function PostPage({
               <p className="text-primary-foreground/70 mb-6">
                 Te lo entregamos funcionando en 24 horas.
               </p>
-              <Link
-                href="/#cotizador"
+              <a
+                href={WHATSAPP_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-accent text-accent-foreground font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-colors"
               >
-                Cotizar mi sitio
-              </Link>
+                <MessageCircle className="w-5 h-5" />
+                Hablar con un asesor
+              </a>
             </div>
           </article>
 
-          {/* TOC */}
-          <aside className="hidden lg:block w-64 flex-shrink-0">
-            <TableOfContents body={post.body} />
-          </aside>
+         
         </div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <RelatedPosts posts={post.relatedPosts} />
         </div>
       </section>
