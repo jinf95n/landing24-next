@@ -14,7 +14,7 @@ export default async function BlogPreview() {
   if (!posts.length) return null;
 
   return (
-    <section className="py-20 bg-background">
+    <section id="blog" className="py-20 bg-background">
       <div className="container">
         <div className="flex items-end justify-between mb-12">
           <div>
