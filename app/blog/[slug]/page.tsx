@@ -111,24 +111,22 @@ export default async function PostPage({
 
       {/* Cover image — FUERA del container */}
       {post.coverImage && (
-        <div className="relative w-full h-[500px] overflow-hidden">
+        <div className="relative w-full h-[240px] sm:h-[380px] lg:h-[500px] overflow-hidden">
           <Image
             src={urlFor(post.coverImage).width(1400).url()}
             alt={post.coverImage.alt || post.title}
             fill
             priority
-            className="object-cover"
+            className="object-cover object-center"
           />
         </div>
       )}
       {/* Content */}
       <section className="container py-16">
         <div className="flex gap-16 max-w-4xl mx-auto">
-           {/* TOC */}
+          {/* TOC */}
           {post.body?.some((b: any) => ["h2", "h3"].includes(b.style)) && (
-            <aside className="hidden lg:block w-64 flex-shrink-0">
-              <TableOfContents body={post.body} />
-            </aside>
+            <TableOfContents body={post.body} />
           )}
           <article className="flex-1 min-w-0">
             <PortableTextRenderer content={post.body} />
@@ -156,8 +154,6 @@ export default async function PostPage({
               </a>
             </div>
           </article>
-
-         
         </div>
 
         <div className="max-w-4xl mx-auto">

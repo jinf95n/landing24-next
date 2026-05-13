@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { List, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -12,24 +12,43 @@ interface Heading {
 
 function extractHeadings(body: any[]): Heading[] {
   return body
-    .filter((block) => block._type === "block" && ["h2", "h3"].includes(block.style))
+    .filter(
+      (block) => block._type === "block" && ["h2", "h3"].includes(block.style),
+    )
     .map((block) => {
       const text = block.children.map((c: any) => c.text).join("");
-      const id = text.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
+      const id = text
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]/g, "");
       return { id, text, level: block.style };
     });
 }
 
-function TOCList({ headings, activeId, onSelect }: { headings: Heading[]; activeId: string; onSelect?: () => void }) {
+function TOCList({
+  headings,
+  activeId,
+  onSelect,
+}: {
+  headings: Heading[];
+  activeId: string;
+  onSelect?: () => void;
+}) {
+
+  const activeRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    if (activeRef.current) {
+      activeRef.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [activeId]);
   return (
     <nav className="space-y-1">
-      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
-        En este artículo
-      </p>
       {headings.map((heading) => (
         <a
           key={heading.id}
           href={`#${heading.id}`}
+          ref={activeId === heading.id ? activeRef : null}
           onClick={onSelect}
           className={`block text-sm py-1.5 border-l-2 transition-all duration-200 ${
             heading.level === "h3" ? "pl-6" : "pl-4"
@@ -59,7 +78,7 @@ export default function TableOfContents({ body }: { body: any[] }) {
           if (entry.isIntersecting) setActiveId(entry.target.id);
         });
       },
-      { rootMargin: "-20% 0% -70% 0%" }
+      { rootMargin: "-20% 0% -70% 0%" },
     );
     headings.forEach(({ id }) => {
       const el = document.getElementById(id);
@@ -73,7 +92,7 @@ export default function TableOfContents({ body }: { body: any[] }) {
     if (!sentinel) return;
     const observer = new IntersectionObserver(
       ([entry]) => setVisible(!entry.isIntersecting),
-      { threshold: 0 }
+      { threshold: 0 },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
@@ -91,11 +110,12 @@ export default function TableOfContents({ body }: { body: any[] }) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.3 }}
-            className="hidden lg:block w-64 flex-shrink-0 order-first self-start sticky top-28"
+            className="hidden lg:block w-64 flex-shrink-0 order-first self-start sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto"
           >
-            
-              <TOCList headings={headings} activeId={activeId} />
-        
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+              En este artículo
+            </p>
+            <TOCList headings={headings} activeId={activeId} />
           </motion.aside>
         )}
       </AnimatePresence>
@@ -138,11 +158,18 @@ export default function TableOfContents({ body }: { body: any[] }) {
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     En este artículo
                   </p>
-                  <button onClick={() => setMobileOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <button
+                    onClick={() => setMobileOpen(false)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <TOCList headings={headings} activeId={activeId} onSelect={() => setMobileOpen(false)} />
+                <TOCList
+                  headings={headings}
+                  activeId={activeId}
+                  onSelect={() => setMobileOpen(false)}
+                />
               </motion.div>
             </>
           )}
