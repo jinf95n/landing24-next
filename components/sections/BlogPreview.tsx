@@ -2,6 +2,8 @@ import Link from "next/link";
 import BlogCard from "@/components/blog/BlogCard";
 import { client } from "@/lib/sanity";
 
+export const revalidate = 60;
+
 export default async function BlogPreview() {
   const posts = await client.fetch(`
     *[_type == "post" && defined(publishedAt)] | order(publishedAt desc)[0...3] {
@@ -12,6 +14,7 @@ export default async function BlogPreview() {
   `);
 
   if (!posts.length) return null;
+  console.log(posts);
 
   return (
     <section id="blog" className="py-20 bg-background">
