@@ -7,7 +7,7 @@ import PortableTextRenderer from "@/components/blog/PortableTextRenderer";
 import TableOfContents from "@/components/blog/TableOfContents";
 import AuthorCard from "@/components/blog/AuthorCard";
 import RelatedPosts from "@/components/blog/RelatedPosts";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Clock, Calendar, User } from "lucide-react";
 import BlogNavbar from "@/components/blog/BlogNavbar";
 import Breadcrumbs from "@/components/blog/Breadcrumbs";
 import BlogCTA from "@/components/blog/BlogCTA";
@@ -52,6 +52,8 @@ export default async function PostPage({
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
+  if (!post) notFound();
+
   const readingTime =
     Math.ceil(
       post.body?.reduce((acc: number, block: any) => {
@@ -75,11 +77,12 @@ export default async function PostPage({
   });
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background selection:bg-accent/30">
       <BlogNavbar />
-      {/* Hero */}
-      <section className="bg-primary pt-24 pb-12">
-        <div className="container max-w-4xl">
+
+      {/* --- HERO SECTION --- */}
+      <section className="bg-primary pt-24 pb-32 md:pb-48">
+        <div className="container max-w-5xl">
           <Breadcrumbs
             crumbs={[
               { label: "Inicio", href: "/" },
@@ -88,75 +91,123 @@ export default async function PostPage({
               { label: post.title },
             ]}
           />
-          {post.category && (
-            <span className="text-accent font-semibold text-sm uppercase tracking-widest">
-              {post.category.title}
-            </span>
-          )}
-          <h1 className="text-3xl md:text-5xl font-black text-primary-foreground mt-3 mb-6 leading-tight">
-            {post.title}
-          </h1>
-          <p className="text-primary-foreground/70 text-lg mb-8">
-            {post.excerpt}
-          </p>
-          <div className="flex items-center gap-4 text-sm text-primary-foreground/50">
-            <span>{post.author?.name}</span>
-            <span>·</span>
-            <span>{publishedDate}</span>
-            <span>·</span>
-            <span>{readingTime} min de lectura</span>
+          
+          <div className="mt-8">
+            {post.category && (
+              <span className="inline-flex items-center bg-accent/10 text-accent border border-accent/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+                {post.category.title}
+              </span>
+            )}
+            
+            <h1 className="text-4xl md:text-6xl font-black text-primary-foreground mb-6 leading-[1.1] tracking-tight">
+              {post.title}
+            </h1>
+            
+            <p className="text-primary-foreground/70 text-xl md:text-2xl mb-10 max-w-3xl leading-relaxed">
+              {post.excerpt}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-primary-foreground/50">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center border border-accent/30 text-accent">
+                  <User className="w-4 h-4" />
+                </div>
+                <span>{post.author?.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>{publishedDate}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>{readingTime} min de lectura</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Cover image — FUERA del container */}
-      {post.coverImage && (
-        <div className="relative w-full h-[240px] sm:h-[380px] lg:h-[500px] overflow-hidden">
-          <Image
-            src={urlFor(post.coverImage).width(1400).url()}
-            alt={post.coverImage.alt || post.title}
-            fill
-            priority
-            className="object-cover object-center"
-          />
-        </div>
-      )}
-      {/* Content */}
-      <section className="container py-16">
-        <div className="flex gap-16 max-w-4xl mx-auto">
-          {/* TOC */}
-          {post.body?.some((b: any) => ["h2", "h3"].includes(b.style)) && (
-            <TableOfContents body={post.body} />
-          )}
-          <article className="flex-1 min-w-0">
-            <PortableTextRenderer content={post.body} />
-            {/* CTA inline */}
-            <BlogCTA />
+      {/* --- COVER IMAGE (OVERLAP) --- */}
+      <section className="container -mt-24 md:-mt-36 relative z-20">
+        {post.coverImage && (
+          <div className="relative w-full max-w-5xl mx-auto group">
+            <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-4 border-background">
+              <Image
+                src={urlFor(post.coverImage).width(1600).url()}
+                alt={post.coverImage.alt || post.title}
+                fill
+                priority
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                sizes="(max-width: 1280px) 100vw, 1280px"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            </div>
+          </div>
+        )}
+      </section>
 
-            {post.author && <AuthorCard author={post.author} />}
+      {/* --- CONTENT SECTION --- */}
+      <section className="container py-16 md:py-24">
+        <div className="flex flex-col lg:flex-row gap-12 md:gap-16 max-w-5xl mx-auto">
+          
+          {/* Sidebar: Table of Contents */}
+          <aside className="lg:w-64 shrink-0 order-2 lg:order-1">
+            <div className="sticky top-28">
+              {post.body?.some((b: any) => ["h2", "h3"].includes(b.style)) && (
+                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Contenido</p>
+                  <TableOfContents body={post.body} />
+                </div>
+              )}
+            </div>
+          </aside>
 
-            {/* CTA */}
-            <div className="mt-12 p-8 bg-primary rounded-2xl text-center">
-              <h3 className="text-2xl font-black text-primary-foreground mb-3">
-                ¿Querés un sitio web profesional?
-              </h3>
-              <p className="text-primary-foreground/70 mb-6">
-                Te lo entregamos funcionando en 24 horas.
-              </p>
-              <a
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-accent text-accent-foreground font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-colors"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Hablar con un asesor
-              </a>
+          {/* Article Body */}
+          <article className="flex-1 min-w-0 order-1 lg:order-2">
+            <div className="prose prose-lg prose-slate max-w-none 
+              prose-headings:font-black prose-headings:tracking-tight prose-headings:text-slate-900
+              prose-a:text-accent prose-a:no-underline hover:prose-a:underline
+              prose-img:rounded-3xl prose-img:shadow-lg
+              prose-strong:text-slate-900">
+              <PortableTextRenderer content={post.body} />
+            </div>
+
+            {/* In-content CTA */}
+            <div className="my-16">
+              <BlogCTA />
+            </div>
+
+            {/* Author Section */}
+            <div className="pt-12 border-t border-slate-100">
+              {post.author && <AuthorCard author={post.author} />}
+            </div>
+
+            {/* Bottom Final CTA */}
+            <div className="mt-16 p-8 md:p-12 bg-slate-900 rounded-[2.5rem] text-center relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 blur-[100px] rounded-full -mr-32 -mt-32" />
+              <div className="relative z-10">
+                <h3 className="text-3xl md:text-4xl font-black text-white mb-4">
+                  ¿Querés un sitio web profesional?
+                </h3>
+                <p className="text-slate-400 text-lg mb-8 max-w-md mx-auto">
+                  Te lo entregamos funcionando en 24 horas con la mejor tecnología.
+                </p>
+                <a
+                  href={WHATSAPP_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 bg-accent text-accent-foreground font-bold px-10 py-5 rounded-2xl hover:scale-105 transition-all shadow-xl shadow-accent/20"
+                >
+                  <MessageCircle className="w-6 h-6" />
+                  Hablar con un asesor
+                </a>
+              </div>
             </div>
           </article>
         </div>
 
-        <div className="max-w-4xl mx-auto">
+        {/* Footer: Related Posts */}
+        <div className="max-w-5xl mx-auto mt-24 border-t border-slate-100 pt-16">
           <RelatedPosts posts={post.relatedPosts} />
         </div>
       </section>
